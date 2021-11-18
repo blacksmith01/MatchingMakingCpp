@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="base">
+      <UniqueIdentifier>{eb2c18a7-7053-4c31-aede-51b82ab5a631}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="server">
+      <UniqueIdentifier>{2633e42c-dc9a-4713-8b26-7ff6132a98b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core">
+      <UniqueIdentifier>{e9294f10-eb25-45a4-a47f-245089bde992}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game">
+      <UniqueIdentifier>{fd9b9541-1ecc-4390-a1a9-5b160300002c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="proj">
+      <UniqueIdentifier>{ffc6eff4-7c51-4c60-a3dd-ca4d3ccd1bd8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)base\base_container.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)base\base_libraries.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)base\base_mutex.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)base\base_algorithm.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)base\base_chrono.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)game\game_all.h">
+      <Filter>game</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)base\base_all.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)core\core_log.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)core\core_all.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)server\matching_mgr.h">
+      <Filter>server</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)server\gameroom_mgr.h">
+      <Filter>server</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)core\core_scheduler.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)proj\pch.h">
+      <Filter>proj</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)server\gameserver.h">
+      <Filter>server</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)base\base_memory.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)server\random_pkt_generator.h">
+      <Filter>server</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)core\core_class_utils.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)base\base_numeric.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)core\core_threading.h">
+      <Filter>core</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)server\gameroom_mgr.cpp">
+      <Filter>server</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)server\matching_mgr.cpp">
+      <Filter>server</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)proj\pch.cpp">
+      <Filter>proj</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)server\gameserver.cpp">
+      <Filter>server</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)core\core_scheduler.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)base\core_log.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)server\random_pkt_generator.cpp">
+      <Filter>server</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)core\core_threading.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

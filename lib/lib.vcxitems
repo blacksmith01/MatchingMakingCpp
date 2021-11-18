@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{16906cd4-99ce-4568-b2ce-935b983713a4}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)base\base_all.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)base\base_algorithm.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)base\base_chrono.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)base\base_container.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)base\base_libraries.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)base\base_memory.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)base\base_mutex.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)base\base_numeric.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)core\core_all.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)core\core_class_utils.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)core\core_log.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)core\core_scheduler.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)core\core_threading.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)game\game_all.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)proj\pch.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)server\gameroom_mgr.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)server\gameserver.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)server\matching_mgr.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)server\random_pkt_generator.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)base\core_log.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)core\core_scheduler.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)core\core_threading.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)proj\pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)server\gameroom_mgr.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)server\gameserver.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)server\matching_mgr.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)server\random_pkt_generator.cpp" />
+  </ItemGroup>
+</Project>

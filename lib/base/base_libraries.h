@@ -1,0 +1,22 @@
+#pragma once
+
+#include <iostream>
+#include <stdint.h>
+#include <chrono>
+#include <numeric>
+#include <limits>
+#include <stdarg.h>
+#include <string>
+#include <array>
+#include <vector>
+#include <set>
+#include <unordered_map>
+#include <queue>
+#include <algorithm>
+#include <functional>
+#include <memory>
+#include <mutex>
+#include <condition_variable>
+#include <thread>
+#include <format>
+#include <random>
