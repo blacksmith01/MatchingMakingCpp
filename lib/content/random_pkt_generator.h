@@ -1,6 +1,6 @@
 #pragma once
 
-#include "game\game_all.h"
+#include "content/game_defines.h"
 
 namespace myproj
 {
@@ -30,8 +30,8 @@ namespace myproj
 		cond_var _cv;
 
 		int32_t _max_thread_count = {};
-		int32_t _thread_run;
-		int32_t _thread_shutdown;
+		int32_t _thread_run = {};
+		int32_t _thread_shutdown = {};
 		
 		bool _is_request_run = {};
 		bool _is_request_shutdown = {};

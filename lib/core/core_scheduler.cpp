@@ -1,12 +1,12 @@
-#include "proj\pch.h"
-#include "core\core_scheduler.h"
+#include "proj/pch.h"
+#include "core/core_scheduler.h"
 
 namespace mylib
 {
 	bool Scheduler::Init()
 	{
-		_top_time = UINT64_MAX;
-		Add(&_dummy, tick_day*356*10);
+		_top_time = std::numeric_limits<systime_t>::max();
+		Add(&_dummy, systime_day*356*10);
 
 		return true;
 	}
@@ -49,7 +49,7 @@ namespace mylib
 		}
 	}
 
-	bool Scheduler::Add(Schedulable* obj, tickcnt_t cycle)
+	bool Scheduler::Add(Schedulable* obj, systime_t period)
 	{
 		scoped_lt_lock slock(_lock);
 
@@ -57,8 +57,8 @@ namespace mylib
 			return false;
 		}
 
-		auto time = tickcnt_now() + cycle;
-		obj->_cycle = cycle;
+		auto time = systime_now() + period;
+		obj->_period = period;
 		obj->_time = time;
 		_queue.push(obj);
 
@@ -78,17 +78,21 @@ namespace mylib
 		scoped_lt_lock slock(_lock);
 
 		while (!_is_request_shutdown) {
-			auto now = tickcnt_now();
+			auto now = systime_now();
 			while (now > _top_time) {
 				auto top = _queue.top();
-				ThreadMgr::get()->AddItem([top, now]() {top->OnSchedule(now); });
+				auto period = top->_period;
+				ThreadMgr::get()->AddItem([top, now, period]() {
+					top->OnSchedule(now);
+					Scheduler::get()->Add(top, period);
+				});
 				_queue.pop();
 				
 				top = _queue.top();
 				_top_time = top->_time;
 			}
 			
-			_cv.wait_for(slock, tickcnt_duration(_top_time - now));
+			_cv.wait_for(slock, std::chrono::milliseconds(_top_time - now));
 		}
 
 		_is_shutdown_complete = true;

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "base\base_all.h"
-#include "core\core_class_utils.h"
+#include "base/base_all.h"
+#include "core/core_class_utils.h"
 
 namespace mylib
 {
@@ -9,7 +9,7 @@ namespace mylib
 	class Schedulable
 	{
 	public:
-		virtual void OnSchedule(tickcnt_t now) = 0;
+		virtual void OnSchedule(systime_t now) = 0;
 
 	public:
 		bool operator > (const Schedulable& other) const {
@@ -21,8 +21,8 @@ namespace mylib
 			}
 		}
 	private:
-		tickcnt_t _cycle;
-		tickcnt_t _time;
+		systime_t _period = {};
+		systime_t _time = {};
 
 		friend class Scheduler;
 	};
@@ -41,7 +41,7 @@ namespace mylib
 		void Shutdown() override;
 
 	public:
-		bool Add(Schedulable* obj, tickcnt_t cycle);
+		bool Add(Schedulable* obj, systime_t period);
 
 	private:
 		void OnThread();
@@ -57,12 +57,12 @@ namespace mylib
 		bool _is_shutdown_complete = {};
 
 		pr_queue<Schedulable*,vector_t<Schedulable*>,greater_ptr<Schedulable>> _queue;
-		tickcnt_t _top_time = {};
+		systime_t _top_time = {};
 
 		class DummyItem : public Schedulable  // queue 가 empty되지 않도록 보장.
 		{
 		public:
-			void OnSchedule(tickcnt_t now) {}
+			void OnSchedule(systime_t now) {}
 		};
 		DummyItem _dummy;
 	};

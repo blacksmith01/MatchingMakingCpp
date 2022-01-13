@@ -1,5 +1,5 @@
-#include "proj\pch.h"
-#include "core\core_threading.h"
+#include "proj/pch.h"
+#include "core/core_threading.h"
 
 namespace mylib
 {
@@ -55,8 +55,8 @@ namespace mylib
 		_is_request_shutdown = true;
 
 		while (true) {
-			_cv.wait(slock, [this]() { return _thread_shutdown == 4; });
-			if (_thread_shutdown == 4) {
+			_cv.wait(slock, [this]() { return _thread_shutdown == _max_thread_count; });
+			if (_thread_shutdown == _max_thread_count) {
 				break;
 			}
 		}
@@ -95,6 +95,12 @@ namespace mylib
 				item();
 			}
 			queue_swap.clear();
+		}
+
+		{
+			scoped_lt_lock slock(_lock);
+			_thread_shutdown++;
+			_cv.notify_all();
 		}
 	}
 }

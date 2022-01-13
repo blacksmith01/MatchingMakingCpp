@@ -1,17 +1,17 @@
 #pragma once
 
-#include "core\core_all.h"
+#include "core/core_all.h"
 
 namespace myproj
 {
 	/*
-	* 
+	*
 	게임 매칭룰
 
 	1. 8인 free for all 대전
 
 	2. 기본적으로 매칭 가능 점수 간격이 있고 대기 시간이 길어질수록 간격이 넓어진다.
-	
+
 	3. 매칭 완료시 취소 불가능하고 바로 게임 시작.
 
 	*/
@@ -51,16 +51,16 @@ namespace myproj
 	constexpr inline bool IsValidPlayerGrade(PlayerGrade grade) {
 		return (grade >= PLAYER_GRADE__MIN) && (grade <= PLAYER_GRADE__MAX);
 	}
-	
+
 	using GamePoint = int32_t;
 	enum enum_game_point_for_grade_starts
 	{
-		GAME_POINT_GRADE_START_BRONZE	= 0,
-		GAME_POINT_GRADE_START_SILVER	= 5000,
-		GAME_POINT_GRADE_START_GOLD		= 10000,
+		GAME_POINT_GRADE_START_BRONZE = 0,
+		GAME_POINT_GRADE_START_SILVER = 5000,
+		GAME_POINT_GRADE_START_GOLD = 10000,
 	};
 	constexpr inline bool IsValidGamePoint(GamePoint grade) {
-		return grade > 0;
+		return grade >= 0;
 	}
 	constexpr enum_player_grades GetPlayerGrade_ByGamePoint(GamePoint pt) {
 		if (pt < GAME_POINT_GRADE_START_SILVER) {
@@ -74,31 +74,62 @@ namespace myproj
 		}
 	}
 
+	enum enum_game_constants
+	{
+		MAX_MATCHING_PLAYER_COUNT = 8,
+		MAX_MATCHING_PHASE_COUNT = 4,
+	};
+
+	const int MATCHING_PHASE_TIME_SEC_ARR[MAX_MATCHING_PHASE_COUNT] = 
+	{
+		5,
+		10,
+		30,
+		60,
+	};
+
 	enum enum_matching_phase_times
 	{
-		MATCHING_PHASE_1_TIME = 10,
+		MATCHING_PHASE_1_TIME = 5,
 		MATCHING_PHASE_2_TIME = 10,
 		MATCHING_PHASE_3_TIME = 30,
 		MATCHING_PHASE_4_TIME = 60,
 	};
 
+	const GamePoint MATCHING_PHASE_POINT_BOUND_ARR[MAX_MATCHING_PHASE_COUNT] = 
+	{
+		100,
+		500,
+		1000,
+		2000,
+	};
 	enum enum_matching_phase_point_bounds
 	{
 		MATCHING_PHASE_1_BOUNDS = 100,
-		MATCHING_PHASE_2_BOUNDS = 200,
-		MATCHING_PHASE_3_BOUNDS = 500,
-		MATCHING_PHASE_4_BOUNDS = 1000,
+		MATCHING_PHASE_2_BOUNDS = 500,
+		MATCHING_PHASE_3_BOUNDS = 1000,
+		MATCHING_PHASE_4_BOUNDS = 2000,
 	};
 
-	enum enum_game_constants
+	inline constexpr GamePoint GetPointBound_ByRegistTime(int32_t elapsed_sec)
 	{
-		MAX_MATCHING_PLAYER_COUNT = 8
-	};
+		if (elapsed_sec < MATCHING_PHASE_1_TIME) {
+			return MATCHING_PHASE_1_BOUNDS;
+		}
+		else if (elapsed_sec < MATCHING_PHASE_2_TIME) {
+			return MATCHING_PHASE_2_BOUNDS;
+		}
+		else if (elapsed_sec < MATCHING_PHASE_3_TIME) {
+			return MATCHING_PHASE_3_BOUNDS;
+		}
+		else { // if (elapsed_sec < MATCHING_PHASE_4_TIME) {
+			return MATCHING_PHASE_4_BOUNDS;
+		}
+	}
 
 	struct player_info
 	{
 		PlayerNo no;
-		PlayerGrade grade;
 		GamePoint point;
 	};
 }

@@ -1,5 +1,5 @@
 #include "proj/pch.h"
-#include "core\core_log.h"
+#include "core/core_log.h"
 
 namespace mylib
 {
@@ -22,7 +22,7 @@ namespace mylib
 			file = file.substr(dir_sep_idx + 1);
 		}
 
-		auto time = sys_clock::now();
+		auto time = std::chrono::system_clock::now();
 		str_t str;
 		auto it = std::back_inserter(str);
 		std::format_to(it, "[{}][{:05}][{:%m-%d %H:%M:%S}] ", GetEnumString_LogLevel(level), thread_id, time);

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "base\base_libraries.h"
-#include "base\base_container.h"
+#include "base/base_libraries.h"
+#include "base/base_container.h"
 
 namespace mylib
 {

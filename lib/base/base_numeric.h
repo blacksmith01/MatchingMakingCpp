@@ -1,6 +1,6 @@
 #pragma once
 
-#include "base\base_libraries.h"
+#include "base/base_libraries.h"
 
 namespace mylib
 {

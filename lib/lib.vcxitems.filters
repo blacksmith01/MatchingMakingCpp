@@ -4,17 +4,14 @@
     <Filter Include="base">
       <UniqueIdentifier>{eb2c18a7-7053-4c31-aede-51b82ab5a631}</UniqueIdentifier>
     </Filter>
-    <Filter Include="server">
-      <UniqueIdentifier>{2633e42c-dc9a-4713-8b26-7ff6132a98b6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="core">
       <UniqueIdentifier>{e9294f10-eb25-45a4-a47f-245089bde992}</UniqueIdentifier>
     </Filter>
-    <Filter Include="game">
-      <UniqueIdentifier>{fd9b9541-1ecc-4390-a1a9-5b160300002c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="proj">
       <UniqueIdentifier>{ffc6eff4-7c51-4c60-a3dd-ca4d3ccd1bd8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="content">
+      <UniqueIdentifier>{cf0a031e-7790-4234-80e6-38891382806d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -33,9 +30,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)base\base_chrono.h">
       <Filter>base</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)game\game_all.h">
-      <Filter>game</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)base\base_all.h">
       <Filter>base</Filter>
     </ClInclude>
@@ -45,26 +39,14 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)core\core_all.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)server\matching_mgr.h">
-      <Filter>server</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)server\gameroom_mgr.h">
-      <Filter>server</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)core\core_scheduler.h">
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)proj\pch.h">
       <Filter>proj</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)server\gameserver.h">
-      <Filter>server</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)base\base_memory.h">
       <Filter>base</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)server\random_pkt_generator.h">
-      <Filter>server</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)core\core_class_utils.h">
       <Filter>core</Filter>
@@ -75,19 +57,23 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)core\core_threading.h">
       <Filter>core</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)content\matching_mgr.h">
+      <Filter>content</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)content\random_pkt_generator.h">
+      <Filter>content</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)content\game_defines.h">
+      <Filter>content</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)content\server_time_mgr.h">
+      <Filter>content</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)gameserver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)server\gameroom_mgr.cpp">
-      <Filter>server</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)server\matching_mgr.cpp">
-      <Filter>server</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)proj\pch.cpp">
       <Filter>proj</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)server\gameserver.cpp">
-      <Filter>server</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)core\core_scheduler.cpp">
       <Filter>core</Filter>
@@ -95,11 +81,18 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)base\core_log.cpp">
       <Filter>core</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)server\random_pkt_generator.cpp">
-      <Filter>server</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)core\core_threading.cpp">
       <Filter>core</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)content\matching_mgr.cpp">
+      <Filter>content</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)content\random_pkt_generator.cpp">
+      <Filter>content</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)content\server_time_mgr.cpp">
+      <Filter>content</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)gameserver.cpp" />
   </ItemGroup>
 </Project>

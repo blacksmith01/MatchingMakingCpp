@@ -1,7 +1,7 @@
-#include "proj\pch.h"
-#include "server\random_pkt_generator.h"
+#include "proj/pch.h"
+#include "content/random_pkt_generator.h"
 
-#include "server\matching_mgr.h"
+#include "content/matching_mgr.h"
 
 namespace myproj
 {
@@ -84,7 +84,6 @@ namespace myproj
 				player_info p_info;
 				p_info.no = thread_idx * max_player_per_thread + ((++count) % max_player_per_thread);
 				p_info.point = rval % (GAME_POINT_GRADE_START_GOLD + GAME_POINT_GRADE_START_GOLD / 10);
-				p_info.grade = GetPlayerGrade_ByGamePoint(p_info.point);
 				Send_Add(p_info);
 				last_player_no = p_info.no;
 			}

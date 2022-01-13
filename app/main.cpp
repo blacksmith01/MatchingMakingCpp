@@ -1,6 +1,8 @@
-#include "proj\pch.h"
+#include "proj/pch.h"
 
-#include "server\gameserver.h"
+#include "gameserver.h"
+
+using namespace myproj;
 
 int main()
 {

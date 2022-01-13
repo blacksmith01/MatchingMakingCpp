@@ -1,6 +1,6 @@
 #pragma once
 
-#include "base\base_mutex.h"
+#include "base/base_mutex.h"
 
 namespace mylib
 {
@@ -46,4 +46,15 @@ namespace mylib
         inline static T* _inst;
     };
 
+    template<typename T>
+    struct [[nodiscard]] scoped_singleton
+    {
+        template<class... ARGS>
+        scoped_singleton(ARGS&&... args) {
+            T::make_single(std::forward<ARGS>(args)...);
+        }
+        ~scoped_singleton() {
+            T::delete_single();
+        }
+    };
 }

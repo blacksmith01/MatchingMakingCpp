@@ -1,6 +1,6 @@
 #pragma once
 
-#include "game\game_all.h"
+#include "content/game_defines.h"
 
 namespace myproj
 {
