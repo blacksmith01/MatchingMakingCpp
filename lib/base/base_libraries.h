@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <stdint.h>
+#include <stdlib.h>
 #include <chrono>
 #include <numeric>
 #include <limits>
@@ -20,3 +21,4 @@
 #include <thread>
 #include <format>
 #include <random>
+#include <signal.h>

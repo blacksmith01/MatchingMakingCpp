@@ -30,10 +30,10 @@ namespace myproj
 		cond_var _cv;
 
 		int32_t _max_thread_count = {};
-		int32_t _thread_run = {};
-		int32_t _thread_shutdown = {};
+		volatile int32_t _thread_run = {};
+		volatile int32_t _thread_shutdown = {};
 		
-		bool _is_request_run = {};
-		bool _is_request_shutdown = {};
+		volatile bool _is_request_run = {};
+		volatile bool _is_request_shutdown = {};
 	};
 }

@@ -51,10 +51,10 @@ namespace mylib
 		lt_lock _lock;
 		cond_var _cv;
 
-		bool _is_request_run = {};
-		bool _is_ready_workthread = {};
-		bool _is_request_shutdown = {};
-		bool _is_shutdown_complete = {};
+		volatile bool _is_request_run = {};
+		volatile bool _is_ready_workthread = {};
+		volatile bool _is_request_shutdown = {};
+		volatile bool _is_shutdown_complete = {};
 
 		pr_queue<Schedulable*,vector_t<Schedulable*>,greater_ptr<Schedulable>> _queue;
 		systime_t _top_time = {};

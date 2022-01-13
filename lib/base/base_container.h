@@ -16,7 +16,7 @@ namespace mylib
 	template <class T,
 		class _Pr = std::less<T>,
 		class _Alloc = std::allocator<T>>
-		using multiset_t = std::multiset<T, _Pr, _Alloc>;
+		using set_t = std::set<T, _Pr, _Alloc>;
 
 	template <class K, class V,
 		class Hash = std::hash<K>,
@@ -37,5 +37,25 @@ namespace mylib
 		std::_Fmt_iterator_buffer<_OutputIt, char> _Buf(_STD move(_Out));
 		_STD vformat_to(std::_Fmt_it{ _Buf }, _Fmt, _Args);
 		return _Buf._Out();
+	}
+
+	template<typename T>
+	int find_index(const std::vector<T>& cont, T v) {
+		auto size = (int)cont.size();
+		for (int i = 0; i < size; i++) {
+			if (cont[i] == v) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	// Swap And Pop
+	template<typename T>
+	void erase_SAP(std::vector<T>& cont, uint32_t idx) {
+		if (idx + 1 != cont.size()) {
+			std::swap(cont[idx], cont.back());
+		}
+		cont.pop_back();
 	}
 }

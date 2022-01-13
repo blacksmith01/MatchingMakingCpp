@@ -9,6 +9,8 @@ namespace myproj
 {
 	bool GameServer::Init()
 	{
+		signal(SIGINT, SignalHandler);
+
 		ServerTimeManager::make_single();
 		Logger::make_single();
 		ThreadMgr::make_single();
@@ -71,9 +73,8 @@ namespace myproj
 		Scheduler::get()->Run();
 		RandomPktGenerator::get()->Run();
 
-		str_t str;
-		while (str != "exit") {
-			std::cin >> str;
+		while (_signal_value == 0) {
+			std::this_thread::sleep_for(std::chrono::seconds(1));
 		}
 
 		logmsg("gameserver shutdown started.");
@@ -83,5 +84,10 @@ namespace myproj
 		ThreadMgr::get()->Shutdown();
 
 		logmsg("gameserver shutdown finished.");
+	}
+
+	void GameServer::SignalHandler(int sig)
+	{
+		_signal_value = sig;
 	}
 }

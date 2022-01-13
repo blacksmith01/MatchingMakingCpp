@@ -87,44 +87,23 @@ namespace myproj
 		30,
 		60,
 	};
-
-	enum enum_matching_phase_times
-	{
-		MATCHING_PHASE_1_TIME = 5,
-		MATCHING_PHASE_2_TIME = 10,
-		MATCHING_PHASE_3_TIME = 30,
-		MATCHING_PHASE_4_TIME = 60,
-	};
-
 	const GamePoint MATCHING_PHASE_POINT_BOUND_ARR[MAX_MATCHING_PHASE_COUNT] = 
 	{
-		100,
-		500,
+		250,
 		1000,
+		1500,
 		2000,
-	};
-	enum enum_matching_phase_point_bounds
-	{
-		MATCHING_PHASE_1_BOUNDS = 100,
-		MATCHING_PHASE_2_BOUNDS = 500,
-		MATCHING_PHASE_3_BOUNDS = 1000,
-		MATCHING_PHASE_4_BOUNDS = 2000,
 	};
 
 	inline constexpr GamePoint GetPointBound_ByRegistTime(int32_t elapsed_sec)
 	{
-		if (elapsed_sec < MATCHING_PHASE_1_TIME) {
-			return MATCHING_PHASE_1_BOUNDS;
+		for (int i = 0; i < MAX_MATCHING_PHASE_COUNT; i++)
+		{
+			if (elapsed_sec < MATCHING_PHASE_TIME_SEC_ARR[i]) {
+				return MATCHING_PHASE_POINT_BOUND_ARR[i];
+			}
 		}
-		else if (elapsed_sec < MATCHING_PHASE_2_TIME) {
-			return MATCHING_PHASE_2_BOUNDS;
-		}
-		else if (elapsed_sec < MATCHING_PHASE_3_TIME) {
-			return MATCHING_PHASE_3_BOUNDS;
-		}
-		else { // if (elapsed_sec < MATCHING_PHASE_4_TIME) {
-			return MATCHING_PHASE_4_BOUNDS;
-		}
+		return MATCHING_PHASE_POINT_BOUND_ARR[MAX_MATCHING_PHASE_COUNT-1];
 	}
 
 	struct player_info

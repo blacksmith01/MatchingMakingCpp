@@ -19,7 +19,9 @@ namespace myproj
 
 		void Run();
 
-	private:
+		static void SignalHandler(int sig);
 
+	private:
+		inline static volatile int _signal_value = {};
 	};
 }

@@ -4,6 +4,46 @@
 
 namespace myproj
 {
+#define DEF_USE_POOLING true
+#define DEF_MATCHING_GROUP_SIZE 8
+#define DEF_GET_SHARDED_IDX(id) ((uint32_t)id & (DEF_MATCHING_GROUP_SIZE-1))
+
+#define DEF_MATCHING_NODE_LIST_DEFAULT_CAPACITY 100
+
+	sharded_node_group::sharded_node_group()
+	{
+		add_queue.reserve(DEF_MATCHING_NODE_LIST_DEFAULT_CAPACITY);
+		del_queue.reserve(DEF_MATCHING_NODE_LIST_DEFAULT_CAPACITY);
+		matched_queue.reserve(DEF_MATCHING_NODE_LIST_DEFAULT_CAPACITY);
+		players.reserve(DEF_MATCHING_NODE_LIST_DEFAULT_CAPACITY);
+		pool.reserve(DEF_MATCHING_NODE_LIST_DEFAULT_CAPACITY);
+		free_queue.reserve(DEF_MATCHING_NODE_LIST_DEFAULT_CAPACITY);
+	}
+
+
+	MatchingMgr::MatchingMgr()
+	{
+		_node_groups = new sharded_node_group[DEF_MATCHING_GROUP_SIZE];
+		_del_proc_queue.reserve(DEF_MATCHING_NODE_LIST_DEFAULT_CAPACITY);
+	}
+
+	MatchingMgr::~MatchingMgr()
+	{
+		if (_node_groups)
+		{
+			for (int i = 0; i < DEF_MATCHING_GROUP_SIZE; i++) {
+				auto& group = _node_groups[i];
+				for (auto p : group.players) {
+					delete p.second;
+				}
+			}
+			delete[] _node_groups;
+
+			for (auto p : _del_proc_queue)
+				delete p;
+		}
+	}
+
 	bool MatchingMgr::Init()
 	{
 		if (!Scheduler::get()->Add(this, systime_second)) {
@@ -27,18 +67,21 @@ namespace myproj
 
 		auto now = ServerTimeManager::get()->GetGameTime();
 
-		auto node = AllocateNode(p_info, now);
+		auto gidx = DEF_GET_SHARDED_IDX(p_info.no);
+		auto& group = _node_groups[gidx];
 
-		scoped_lt_lock lock(_lock);
+		scoped_lt_lock lock(group.lock);
 
-		auto result = _players.emplace(node->base.no, node);
+		auto node = AllocateNode(group, p_info, now);
+
+		auto result = group.players.emplace(node->base.no, node);
 		if (!result.second) {
-			FreeNode(node);
+			FreeNode(group, node);
 			return RESULT_MATCHING_ADD_DUPLICATED;
 		}
 
-		_add_queue.insert(result.first->second);
-		_add_del_requested++;
+		group.add_queue.push_back(result.first->second);
+		group.add_del_requested++;
 
 		logmsg("[MATCH] add player({:05}), [{:06}]", node->base.no, node->base.point);
 
@@ -49,10 +92,13 @@ namespace myproj
 	{
 		directly_deleted = false;
 
-		scoped_lt_lock lock(_lock);
+		auto gidx = DEF_GET_SHARDED_IDX(p_no);
+		auto& group = _node_groups[gidx];
 
-		auto result = _players.find(p_no);
-		if (result == _players.end()) {
+		scoped_lt_lock lock(group.lock);
+
+		auto result = group.players.find(p_no);
+		if (result == group.players.end()) {
 			return RESULT_MATCHING_DEL_NOT_REQUESTED;
 		}
 
@@ -65,16 +111,17 @@ namespace myproj
 		}
 
 		if (!node->in_matching) {
-			if (!_add_queue.contains(node)) {
+			auto qidx = find_index(group.add_queue, node);
+			if (qidx < 0) {
 				return RESULT_UNKNOWN;
 			}
 			// add_queue 에 들어 있는 경우 즉시 삭제한다.
-			_players.erase(p_no);
-			_add_queue.erase(node);
-
+			group.players.erase(p_no);
+			erase_SAP(group.add_queue, qidx);
+			group.add_del_requested--;
 			logmsg("[MATCH] del player({:05})", node->base.no);
 
-			FreeNode(node);
+			FreeNode(group, node);
 			directly_deleted = true;
 			return RESULT_OK;
 		}
@@ -83,8 +130,8 @@ namespace myproj
 		// 때문에 del이 확정될 때 cancel 패킷을 보낸다.
 		node->del_reseved = 1;
 
-		_del_queue.push_back(node);
-		_add_del_requested++;
+		group.del_queue.push_back(node);
+		group.add_del_requested++;
 
 		return RESULT_OK;
 	}
@@ -95,13 +142,23 @@ namespace myproj
 
 		_stat_cycles++;
 
-		PrepareProcqueue();
+		for (uint32_t i = 0; i < DEF_MATCHING_GROUP_SIZE; i++) {
+			PrepareProcQueue(i);
+		}
 
 		RebuildSortedList(gametime);
 
-		if (_sorted_regist.size() >= MAX_MATCHING_PLAYER_COUNT) {
-			ProgressMatching(gametime);
+		for (auto node : _del_proc_queue) {
+			if (node->del_reseved) {
+				logmsg("[MATCH] del player({:05}) completed", node->base.no);
+				Send_MatchingDelCompleted(node);
+			}
+			_node_groups[DEF_GET_SHARDED_IDX(node->base.no)].free_queue.push_back(node);
 		}
+		_add_proc_queue.clear();
+		_del_proc_queue.clear();
+
+		ProgressMatching(gametime);
 
 		/*if (_stat_cycles % 10 == 0)*/ {
 			GamePoint oldest_pt = 0;
@@ -116,43 +173,56 @@ namespace myproj
 		}
 	}
 
-	void MatchingMgr::PrepareProcqueue()
+	void MatchingMgr::PrepareProcQueue(uint32_t gidx)
 	{
-		if (_add_del_requested) {
-			scoped_lt_lock slock(_lock);
+		auto& group = _node_groups[gidx];
 
-			if (!_add_queue.empty() || !_del_queue.empty()) {
-				// 추가는 그대로 스왑
-				_add_proc_queue.swap(_add_queue);
-
-				// 삭제는 매칭완료된 유저 데이터가 남아 있을 수 있다.
-				if (!_del_proc_queue.empty()) {
-					for (auto elm : _del_queue) {
-						// 매칭완료된 경우 중복 포함되지 않도록 한다.
-						if (!elm->game_matched) {
-							_del_proc_queue.push_back(elm);
-						}
+		if (group.add_del_requested) {
+			scoped_lt_lock slock(group.lock);
+			if (!group.add_queue.empty() || !group.del_queue.empty()) {
+				for (auto& node : group.add_queue) {
+					node->in_matching = 1;
+					_add_proc_queue.insert(node);
+				}
+				group.add_queue.clear();
+				for (auto node : group.matched_queue) {
+					if (!node->del_reseved) { // 매칭완료된 경우 중복 포함되지 않도록 한다.
+						group.del_queue.push_back(node);
 					}
-					_del_queue.clear();
 				}
-				else {
-					_del_proc_queue.swap(_del_queue);
+				group.matched_queue.clear();
+				for (auto node : group.del_queue) {
+					group.players.erase(node->base.no);
+					_del_proc_queue.push_back(node);
 				}
+				group.del_queue.clear();
 
-				for (auto elm : _add_proc_queue) {
-					elm->in_matching = 1;
+				for (auto node : group.free_queue) {
+					FreeNode(group, node);
 				}
-				for (auto elm : _del_proc_queue) {
-					_players.erase(elm->base.no);
-				}
+				group.free_queue.clear();
 			}
-			_add_del_requested = 0;
+			group.add_del_requested = 0;
 		}
-		else if (!_del_proc_queue.empty()) {
-			scoped_lt_lock slock(_lock);
-			for (auto p : _del_proc_queue) {
-				_players.erase(p->base.no);
+		else if (!group.matched_queue.empty()) {
+			scoped_lt_lock slock(group.lock);
+			for (auto node : group.matched_queue) {
+				group.players.erase(node->base.no);
+				_del_proc_queue.push_back(node);
 			}
+			group.matched_queue.clear();
+
+			for (auto node : group.free_queue) {
+				FreeNode(group, node);
+			}
+			group.free_queue.clear();
+		}
+		else if (!group.free_queue.empty()) {
+			scoped_lt_lock slock(group.lock);
+			for (auto node : group.free_queue) {
+				FreeNode(group, node);
+			}
+			group.free_queue.clear();
 		}
 	}
 
@@ -173,8 +243,8 @@ namespace myproj
 	{
 		auto now_sec = (uint32_t)(now / 1000);
 
-		if (_add_proc_queue.empty() && _del_proc_queue.empty()) {
-			for (auto& node : _sorted_regist) {
+		if (_stat_matched_latest == 0 && _add_proc_queue.empty() && _del_proc_queue.empty()) {
+			for (auto node : _sorted_regist) {
 				node->point_bound = GetPointBound_ByRegistTime(now_sec - node->regist_time);
 			}
 			return;
@@ -188,7 +258,7 @@ namespace myproj
 			auto it_end = _add_proc_queue.end();
 			auto cmp_pt = (it == it_end) ? n_max<GamePoint>() : (*it)->base.point;
 
-			for (auto& node : _sorted_point) {
+			for (auto node : _sorted_point) {
 				if (node->del_reseved || node->game_matched) {
 					continue;
 				}
@@ -209,29 +279,18 @@ namespace myproj
 
 		// 시간 기준 정렬은 한 사이클에 추가되는 유저들이 차이가 크지않기 때문에 그대로 뒤에 추가한다.
 		{
-			for (auto& node : _sorted_regist) {
+			for (auto node : _sorted_regist) {
 				if (node->del_reseved || node->game_matched) {
 					continue;
 				}
 				__AddTo_TempList_Rg(_replacer, node, now_sec);
 			}
-			for (auto& node : _add_proc_queue) {
+			for (auto node : _add_proc_queue) {
 				__AddTo_TempList_Rg(_replacer, node, now_sec);
 			}
 			_sorted_regist.swap(_replacer);
 			_replacer.clear();
 		}
-
-		_add_proc_queue.clear();
-		for (auto node : _del_proc_queue) {
-			if (!node->game_matched) {
-				// 매칭 취소 확정.
-				logmsg("[MATCH] canceld player({:05})", node->base.no);
-				Send_Canceled(node);
-			}
-			FreeNode(node);
-		}
-		_del_proc_queue.clear();
 	}
 
 	struct MatchingContext
@@ -246,8 +305,7 @@ namespace myproj
 		}
 		bool CheckMatchable(GamePoint op_pt, GamePoint op_pt_bnd)
 		{
-			for (int32_t i = 0; i < matched_count; i++)
-			{
+			for (int32_t i = 0; i < matched_count; i++) {
 				auto node = matched_nodes[i];
 				auto my_pt = node->base.point;
 				if (my_pt < op_pt - op_pt_bnd || my_pt > op_pt + op_pt_bnd) {
@@ -280,6 +338,7 @@ namespace myproj
 	void MatchingMgr::ProgressMatching(systime_t now)
 	{
 		_stat_remain = (int32_t)_sorted_regist.size();
+		_stat_matched_latest = 0;
 
 		MatchingContext ctx;
 
@@ -362,27 +421,56 @@ namespace myproj
 
 		for (int j = 0; j < count; j++) {
 			auto node = nodes[j];
+			auto gidx = DEF_GET_SHARDED_IDX(node->base.no);
+			auto& group = _node_groups[gidx];
+			group.matched_queue.push_back(node);
 			node->game_matched = 1;
-			_del_proc_queue.push_back(node);
+			Send_MatchingSuccess(node);
 			logmsg("[MATCH] matched game({:05}) [{:06} +-{:04}] player({:05})", new_game_id, node->base.point, node->point_bound, node->base.no);
 		}
 		_stat_matched += count;
+		_stat_matched_latest += count;
 		_stat_remain -= count;
 	}
 
-	mathcing_player_node* MatchingMgr::AllocateNode(const player_info& p, systime_t now) const
+	mathcing_player_node* MatchingMgr::AllocateNode(sharded_node_group& group, const player_info& p, systime_t now) const
 	{
-		return new mathcing_player_node {
-			.base = p,
-			.regist_time = uint32_t(now / 1000),
-		};
+		mathcing_player_node* node = nullptr;
+		if (group.pool.empty()) {
+			node = new mathcing_player_node();
+		}
+		else {
+			node = group.pool.back();
+			group.pool.resize(group.pool.size() - 1);
+		}
+
+		node->base = p;
+		node->regist_time = uint32_t(now / 1000);
+		node->point_bound = 0;
+		node->point_order = 0;
+		node->regist_order = 0;
+		node->in_matching = 0;
+		node->del_reseved = 0;
+		node->game_matched = 0;
+		node->unknown = 0;
+
+		return node;
 	}
-	void MatchingMgr::FreeNode(mathcing_player_node* node) const
+	void MatchingMgr::FreeNode(sharded_node_group& group, mathcing_player_node* node) const
 	{
-		delete node;
+		if (DEF_USE_POOLING) {
+			group.pool.push_back(node);
+		}
+		else {
+			delete node;
+		}
 	}
 
-	void MatchingMgr::Send_Canceled(mathcing_player_node* node)
+	void MatchingMgr::Send_MatchingSuccess(mathcing_player_node* node)
+	{
+
+	}
+	void MatchingMgr::Send_MatchingDelCompleted(mathcing_player_node* node)
 	{
 
 	}
